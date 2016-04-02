@@ -1,7 +1,7 @@
-
 import os
 import time
 import random
+import sys
 
 def execme(command,dryrun=False):    
     '''Wrapper for executing commands.
@@ -34,11 +34,14 @@ if __name__ == "__main__":
     
     iref = int(getInput('0', '\nStart from?: '))
 
-    url += '&num=20&start=%i'%iref
+    #url += '&num=20&start=%i'%iref
+    url += '&start=%i&num=20'%iref
     
     #execme('python scholar.py  --override "%s" --txt-globals > globals.txt'%url,dryrun)
     
     execme('python scholar.py  --override "%s" --csv-header > blah.csv'%url,dryrun)
+    if os.stat("blah.csv").st_size == 0:
+        sys.exit()
     while True:
         url = url.replace('start=%i'%iref,'start=%i'%(iref+20))
         iref += 20

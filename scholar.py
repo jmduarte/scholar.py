@@ -359,7 +359,7 @@ class ScholarArticleParser(object):
         content as needed, and notifies the parser instance of
         resulting instances via the handle_article callback.
         """
-        self.soup = BeautifulSoup(html)
+        self.soup = BeautifulSoup(html, "html.parser")
 
         # This parses any global, non-itemized attributes from the page.
         self._parse_globals()
@@ -737,6 +737,7 @@ class SearchScholarQuery(ScholarQuery):
         self.scope_title = False # If True, search in title only
         self.author = None 
         self.pub = None
+        self.override = None
         self.timeframe = [None, None]
         self.include_patents = True
         self.include_citations = True
@@ -764,6 +765,10 @@ class SearchScholarQuery(ScholarQuery):
         """
         self.scope_title = title_only
 
+    def set_override(self, override):
+        """Overrides url you want to send."""
+        self.override = override
+        
     def set_author(self, author):
         """Sets names that must be on the result's author list."""
         self.author = author
@@ -790,6 +795,8 @@ class SearchScholarQuery(ScholarQuery):
         self.include_patents = yesorno
 
     def get_url(self):
+        if self.override is not None:
+            return self.override
         if self.words is None and self.words_some is None \
            and self.words_none is None and self.phrase is None \
            and self.author is None and self.pub is None \
@@ -945,7 +952,7 @@ class ScholarQuerier(object):
         # Now parse the required stuff out of the form. We require the
         # "scisig" token to make the upload of our settings acceptable
         # to Google.
-        soup = BeautifulSoup(html)
+        soup = BeautifulSoup(html, "html.parser")
 
         tag = soup.find(name='form', attrs={'id': 'gs_settings_form'})
         if tag is None:
@@ -1130,6 +1137,8 @@ scholar.py -c 5 -a "albert einstein" -t --none "quantum theory" --after 1970"""
     parser = optparse.OptionParser(usage=usage, formatter=fmt)
     group = optparse.OptionGroup(parser, 'Query arguments',
                                  'These options define search query arguments and parameters.')
+    group.add_option('-o', '--override', metavar='OVERRIDE', default=None,
+                     help='override URL string')
     group.add_option('-a', '--author', metavar='AUTHORS', default=None,
                      help='Author name(s)')
     group.add_option('-A', '--all', metavar='WORDS', default=None, dest='allw',
@@ -1230,6 +1239,8 @@ scholar.py -c 5 -a "albert einstein" -t --none "quantum theory" --after 1970"""
         query = ClusterScholarQuery(cluster=options.cluster_id)
     else:
         query = SearchScholarQuery()
+        if options.override:
+            query.set_override(options.override)
         if options.author:
             query.set_author(options.author)
         if options.allw:

@@ -31,8 +31,10 @@ if __name__ == "__main__":
 
     url = getInput('https://scholar.google.com/scholar?q=allintitle%3A%28%22oppositional+defiant+disorder%22+OR+%22ODD%22+OR+%22ADHD%22+OR+%22attention+deficit+hyperactivity+disorder%22+OR+%22CD%22+OR+%22conduct+disorder%22%29%28%22borderline+personality+disorder%22+OR+%22BPD%22%29&hl=en&as_sdt=0%2C5&as_ylo=1994&as_yhi=2016', '\nWhat is the url you want?: ')
 
-    iref = 0
-    url += '&num=20&start=0'
+    
+    iref = int(getInput('0', '\nStart from?: '))
+
+    url += '&num=20&start=%i'%iref
     
     #execme('python scholar.py  --override "%s" --txt-globals > globals.txt'%url,dryrun)
     
